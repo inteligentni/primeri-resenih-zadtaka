@@ -89,7 +89,7 @@ ggplot(data, mapping = aes(x = instrumentalness, fill = High_Streams)) + geom_de
 data$instrumentalness <- NULL
 ggplot(data, mapping = aes(x = speechiness, fill = High_Streams)) + geom_density(alpha = 0.5)
 #ni ova varijabla nam ne utice na model tako da cemo je izbaciti
-data$speechines <- NULL
+data$speechiness <- NULL
 ggplot(data, mapping = aes(x = mode, fill = High_Streams)) + geom_bar(position = 'dodge')
 #veca je verovatnoca da pesma ima veci broj pustanja ako je karakter pesme major
 
@@ -101,13 +101,13 @@ data$mode <- as.numeric(data$mode)
 
 #proveravamo da li neke variujable imaju autlajere
 
-apply(X = data[,c(1,2,3,4,5,7)], 2, FUN = function(x) length(boxplot.stats(x)$out))
+apply(X = data[,c(1,2,3,4,5,6)], 2, FUN = function(x) length(boxplot.stats(x)$out))
 #vidimo da sve varijable imaju autlajere, potrebno je da ih standardizujemo
 #proveravamo da li imaju normalnu raspodelu kako bismo znali na koji nacin cemo izvrsiti standardizaciju
-apply(X = data[,c(1,2,3,4,5,7)], 2, FUN = function(x) shapiro.test(x))
+apply(X = data[,c(1,2,3,4,5,6)], 2, FUN = function(x) shapiro.test(x))
 #sve varijable imaju p < 0.05 sto znaci da nemaju normalnu raspodelu
 
-data.std <- apply(X = data[,c(1,2,3,4,5,7)], 2, FUN = function(x) scale(x, center = median(x), scale = IQR(x)))
+data.std <- apply(X = data[,c(1,2,3,4,5,6)], 2, FUN = function(x) scale(x, center = median(x), scale = IQR(x)))
 data.std <- as.data.frame(data.std)
 
 #kreirali smo standardizovani dataframe
@@ -134,7 +134,7 @@ kGrid =  expand.grid(.k = seq(from = 3, to = 25, by = 2))
 
 #stavili smo neparne brojeve od 3 do 25 jer su nam oni potrebni kako bi jedna klasa bila dominantnija
 knn.cv <- train( 
-  x = train.data[, -8],
+  x = train.data[, -7],
   y = train.data$High_Streams,
   method = "knn", # use rpart() to build multiple
   trControl = numFolds, # <folds> from above
@@ -146,8 +146,8 @@ kValue <- knn.cv$bestTune$k
 kValue
 
 library(class)
-knn.pred <- knn(train = train.data[,-8], # training data without the output (class) variable
-                test = test.data[,-8], # test data without the output (class) variable
+knn.pred <- knn(train = train.data[,-7], # training data without the output (class) variable
+                test = test.data[,-7], # test data without the output (class) variable
                 cl = train.data$High_Streams, # output (class) variable is specified here
                 k = kValue) 
 #kreirali smo model knn i sada mozemo kreirati matricu konfuzije
